@@ -1,14 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Navbar from './Navbar';
 
 const TeamleaderDashboard: React.FC = () => {
-  const { user } = useAuth();
-  const candidates = [
-    { id: '1', name: 'John Doe', progress: 75 },
-    { id: '2', name: 'Jane Smith', progress: 60 },
-    { id: '3', name: 'Bob Johnson', progress: 90 },
-  ];
+  const { user, loading } = useAuth();
+  const [profileData, setProfileData] = useState(null);
+  const [candidates, setCandidates] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (user?.id) {
+        try {
+          // Replace with your actual API endpoints
+          const [profileResponse, candidatesResponse] = await Promise.all([
+            fetch(`/api/teamleaders/${user.id}`),
+            fetch(`/api/teamleaders/${user.id}/candidates`)
+          ]);
+          
+          const [profile, candidatesData] = await Promise.all([
+            profileResponse.json(),
+            candidatesResponse.json()
+          ]);
+          
+          setProfileData(profile);
+          setCandidates(candidatesData);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      }
+    };
+
+    fetchData();
+  }, [user]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -18,8 +45,8 @@ const TeamleaderDashboard: React.FC = () => {
           <h1 className="text-2xl font-bold mb-6">Team Leader Dashboard</h1>
           <div className="mb-6">
             <h2 className="text-xl font-semibold mb-2">Team Leader Profile</h2>
-            <p>Login ID: {user?.id}</p>
-            <p>Name: {user?.name}</p>
+            <p>Login ID: {profileData?.id || user?.id}</p>
+            <p>Name: {profileData?.name || user?.name}</p>
           </div>
           <div>
             <h2 className="text-xl font-semibold mb-4">Candidates Under Team</h2>
