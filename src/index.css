@@ -1,0 +1,10 @@
+@import '@fontsource/averia-sans-libre/400.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: 'Averia Sans Libre', sans-serif;
+}
